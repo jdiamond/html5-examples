@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Draggable</title>
+    <style>
+        #draggable {
+            width: 100px;
+            height: 100px;
+            text-align: center;
+            line-height: 100px;
+            color: white;
+            background: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Draggable</h1>
+
+    <div id="draggable" draggable="true">Drag Me!</div>
+
+    <script>
+        var draggable = document.getElementById('draggable');
+        var offsetX, offsetY;
+
+        draggable.ondragstart = function(e) {
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', 'whatever');
+            offsetX = e.pageX - e.target.offsetLeft;
+            offsetY = e.pageY - e.target.offsetTop;
+        }
+
+        window.ondragover = function(e) {
+            e.preventDefault();
+            return false;
+        };
+
+        window.ondrop = function(e) {
+            draggable.style.position = 'absolute';
+            draggable.style.left = (e.pageX - offsetX) + 'px';
+            draggable.style.top = (e.pageY - offsetY) + 'px';
+            console.log(e);
+            e.preventDefault();
+            return false;
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "name": "WebSocketExamples",
+  "dependencies": {
+    "ws": "~0.4.21"
+  },
+  "license": "MIT"
+}

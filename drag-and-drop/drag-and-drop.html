@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Drag and Drop</title>
+    <style>
+        label {
+            margin-right: 20px;
+        }
+        .box {
+            display: inline-block;
+            width: 100px;
+            height: 100px;
+            text-align: center;
+            line-height: 100px;
+            border: 1px solid white;
+        }
+        #draggable {
+            color: white;
+            background: red;
+            cursor: move;
+        }
+        #droppable {
+            color: white;
+            background: blue;
+        }
+        .over {
+            border: 1px dashed white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Drag and Drop</h1>
+
+    <p>
+        <label>setDragImage: <input id="setDragImage" type="checkbox"></label>
+        <label>effectAllowed:   <select id="effectAllowed">
+                                    <option></option>
+                                    <option>none</option>
+                                    <option>copy</option>
+                                    <option>move</option>
+                                    <option>link</option>
+                                    <option>copyMove</option>
+                                    <option>copyLink</option>
+                                    <option>linkMove</option>
+                                    <option>all</option>
+                                </select>
+        </label>
+        <label>dropEffect:  <select id="dropEffect">
+                                    <option></option>
+                                    <option>none</option>
+                                    <option>copy</option>
+                                    <option>move</option>
+                                    <option>link</option>
+                            </select>
+        </label>
+    </p>
+
+    <div id="draggable" class="box" draggable="true">Drag Me!</div>
+
+    <div id="droppable" class="box">Drop Here!</div>
+
+    <ul id="messages">
+    </ul>
+
+    <script>
+        var img = new Image();
+        img.src = 'HTML5_Logo_64.png';
+
+        var draggable = document.getElementById('draggable');
+
+        draggable.onselectstart = function(e) {
+            e.preventDefault();
+            e.target.dragDrop();
+        };
+
+        draggable.ondragstart = function(e) {
+            console.log('dragstart');
+            e.dataTransfer.setData('Text', e.target.innerHTML);
+
+            if (document.getElementById('setDragImage').checked) {
+                e.dataTransfer.setDragImage(img, 32, 32);
+            }
+
+            var effectAllowed = document.getElementById('effectAllowed').value;
+            if (effectAllowed) {
+                e.dataTransfer.effectAllowed = effectAllowed;
+            }
+        };
+
+        draggable.ondragend = function(e) {
+        };
+
+        var droppable = document.getElementById('droppable');
+
+        droppable.ondragenter = function(e) {
+            console.log('dragenter');
+            // e.target.classList.add('over');
+        };
+
+        droppable.ondragover = function(e) {
+            e.preventDefault(); // Allows the drop.
+
+            var dropEffect = document.getElementById('dropEffect').value;
+            if (dropEffect) {
+                e.dataTransfer.dropEffect = dropEffect;
+            }
+        };
+
+        droppable.ondragleave = function(e) {
+            // e.target.classList.remove('over');
+        };
+
+        droppable.ondrop = function(e) {
+            e.preventDefault(); // FF freaks out without this.
+            // e.target.classList.remove('over');
+            var text = e.dataTransfer.getData('Text');
+            log('dropped: ' + text);
+        };
+
+        function log(message) {
+            var li = document.createElement('li');
+            li.appendChild(document.createTextNode(message));
+            document.getElementById('messages').appendChild(li);
+        }
+    </script>
+</body>
+</html>

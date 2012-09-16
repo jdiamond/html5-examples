@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>WebSocket Stock Client</title>
+
+    <style>
+        .bar {
+            padding: 5px;
+            background-color: #cfc;
+            box-shadow: 2px 2px 2px #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>WebSocket Stock Client</h1>
+
+    <p>Be sure stock-server.js is running...</p>
+
+    <p>
+        <input id="server" type="text" value="ws://localhost:8080/" size="40">
+        <button onclick="openSocket()">Open</button>
+        <button onclick="closeSocket()">Close</button>
+    </p>
+
+    <p>
+        <input id="symbol" type="text" value="ACME" size="40">
+        <button onclick="watch()">Watch</button>
+        <button onclick="stopWatching()">Stop Watching</button>
+    </p>
+
+    <p>All prices are made up...</p>
+
+    <table id="chart">
+    </table>
+
+    <ul id="messages">
+    </ul>
+
+    <script>
+        var ws;
+
+        function openSocket() {
+            log('opening');
+
+            var url = document.getElementById('server').value;
+            ws = new WebSocket(url);
+
+            ws.onopen = function() {
+                log('open');
+            };
+
+            ws.onclose = function() {
+                log('close');
+            };
+
+            ws.onmessage = function(e) {
+                log('received: ' + e.data);
+                handleMessage(e.data);
+            };
+
+            ws.onerror = function() {
+                log('error');
+            };
+        }
+
+        function closeSocket() {
+            log('closing');
+            ws.close();
+        }
+
+        function watch() {
+            var symbol = document.getElementById('symbol').value;
+            var message = 'WATCH:' + symbol;
+            log('sending: ' + message);
+            ws.send(message);
+        }
+
+        function stopWatching() {
+            var symbol = document.getElementById('symbol').value;
+            var message = 'STOP:' + symbol;
+            log('sending: ' + message);
+            ws.send(message);
+        }
+
+        var barChart = new BarChart(document.getElementById('chart'));
+
+        function handleMessage(message) {
+            if (message.indexOf('WATCHING:') === 0) {
+                var symbol = message.substr(message.indexOf(':') + 1);
+                barChart.add(symbol);
+            } else if (message.indexOf('STOPPED:') === 0) {
+                var symbol = message.substr(message.indexOf(':') + 1);
+                barChart.remove(symbol);
+            } else if (message.indexOf('=') !== -1) {
+                var symbol = message.substr(0, message.indexOf('='));
+                var price = message.substr(message.indexOf('=') + 1);
+                barChart.update(symbol, price);
+            } else {
+                log('unknown message: ' + message);
+            }
+        }
+
+        function BarChart(table) {
+            var bars = {};
+
+            this.add = function(symbol) {
+                if (!(symbol in bars)) {
+                    var chart = table;
+                    var symbolRow = chart.insertRow(-1);
+                    var labelCell = symbolRow.insertCell(-1);
+                    labelCell.innerHTML = symbol;
+                    var priceCell = symbolRow.insertCell(-1);
+                    var barDiv = document.createElement('div');
+                    barDiv.className = 'bar';
+                    priceCell.appendChild(barDiv);
+                    bars[symbol] = barDiv;
+                }
+            };
+
+            this.remove = function(symbol) {
+                var symbolRow = bars[symbol].parentNode.parentNode;
+                table.deleteRow(symbolRow.rowIndex);
+                delete bars[symbol];
+            };
+
+            this.update = function(symbol, price) {
+                var barDiv = bars[symbol];
+                barDiv.innerHTML = price;
+                barDiv.style.width = (price * 5) + 'px';
+            };
+        }
+
+        function log(message) {
+            var li = document.createElement('li');
+            li.innerHTML = message;
+            document.getElementById('messages').appendChild(li);
+        }
+    </script>
+</body>
+</html>
