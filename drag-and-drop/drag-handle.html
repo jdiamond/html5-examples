@@ -21,24 +21,17 @@
 <body>
     <h1>Drag Handle</h1>
     
-    <div id="draggable" draggable="true">
-        <div id="handle">
+    <div id="draggable">
+        <div id="handle" draggable="true">
         </div>
     </div>
 
     <script>
-        var draggable = document.getElementById('draggable');
+        var container = document.getElementById('draggable');
         var handle = document.getElementById('handle');
-        var target = false;
-        draggable.onmousedown = function(e) {
-            target = e.target;
-        };
-        draggable.ondragstart = function(e) {
-            if (handle.contains(target)) {
-                e.dataTransfer.setData('text/plain', 'handle');
-            } else {
-                e.preventDefault();
-            }
+        handle.ondragstart = function(e) {
+            e.dataTransfer.setData('text/plain', 'handle');
+            e.dataTransfer.setDragImage(container, 0, 0);
         };
     </script>
 
